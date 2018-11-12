@@ -1,75 +1,134 @@
-data Lexeme =
-      Plus
-    | Mul
-    | LParen
-    | RParen
-    | A
-        deriving (Show, Eq)
+module RecDesc (module RecDesc, module Control.Applicative) where
 
+import Control.Applicative
+
+import Tokeniser
+
+-- The top-level production.
 data Sentence =
       SenE Expr
     | SenT Term
     | SenA Atom
-        deriving (Show, Eq)
+        deriving (Show, Eq, Ord)
 
+-- Use the non-left-recursive version of the grammar for recursive descent.
 data Expr =
-      Expr `ExprPlus` Term
-    | ExprT Term
-        deriving (Show, Eq)
+      Expr Term Expr'
+        deriving (Show, Eq, Ord)
+
+data Expr' =
+      Expr'Plus Term Expr'
+    | Expr'Epsilon
+        deriving (Show, Eq, Ord)
 
 data Term =
-      Term `TermMul` Atom
-    | TermA Atom
-        deriving (Show, Eq)
+      Term Atom Term'
+        deriving (Show, Eq, Ord)
+
+data Term' =
+      Term'Mul Atom Term'
+    | Term'Epsilon
+        deriving (Show, Eq, Ord)
 
 data Atom =
-      AtomExpr Expr
+      Atom Expr
     | Unit
-        deriving (Show, Eq)
+        deriving (Show, Eq, Ord)
 
-tokenMap :: Char -> Maybe Lexeme
-tokenMap '+'  = Just Plus
-tokenMap '*'  = Just Mul
-tokenMap '('  = Just LParen
-tokenMap ')'  = Just RParen
-tokenMap 'a'  = Just A
-tokenMap ' '  = Nothing
-tokenMap '\n' = Nothing
-tokenMap '\t' = Nothing
-tokenMap e = error $ e:" is not a valid token."
+newtype Parser a = P ([Lexeme] -> Maybe (a, [Lexeme]))
 
-maybeMap :: (a -> Maybe b) -> [a] -> [b]
-maybeMap f (x:xs)
-    | Just c <- f x = c:(maybeMap f xs)
-    | otherwise     = maybeMap f xs
-maybeMap _ [] = []
+instance Functor Parser where
+   -- fmap :: (a -> b) -> Parser a -> Parser b
+   fmap g p = P (\inp -> case parse p inp of
+                           Nothing       -> Nothing
+                           Just (v, out) -> Just (g v, out))
 
-tokenise :: String -> [Lexeme]
-tokenise = maybeMap tokenMap
+instance Applicative Parser where
+   -- pure :: a -> Parser a
+   pure v = P (\inp -> Just (v,inp))
 
-parseSentence :: [Lexeme] -> (Maybe Sentence, [Lexeme])
-parseSentence ls | (Just e) <- tok = (Just $ SenE e, rest)
-                 | otherwise       = (Nothing, ls)
-    where (tok, rest) = parseExpr ls
+   -- <*> :: Parser (a -> b) -> Parser a -> Parser b
+   pg <*> px = P (\inp -> case parse pg inp of
+                             Nothing       -> Nothing
+                             Just (g, out) -> parse (fmap g px) out)
 
-parseExpr :: [Lexeme] -> (Maybe Expr, [Lexeme])
-parseExpr ls | (Just t) <- tok = (Just $ ExprT t, rest)
-             | otherwise       = (Nothing, ls)
-    where (tok, rest) = parseTerm ls
+instance Monad Parser where
+   -- (>>=) :: Parser a -> (a -> Parser b) -> Parser b
+   p >>= f = P (\inp -> case parse p inp of
+                           Nothing       -> Nothing
+                           Just (v, out) -> parse (f v) out)
 
-parseTerm :: [Lexeme] -> (Maybe Term, [Lexeme])
-parseTerm ls | (Just a) <- tok = (Just $ TermA a, rest)
-             | otherwise       = (Nothing, ls)
-    where (tok, rest) = parseAtom ls
 
-parseAtom :: [Lexeme] -> (Maybe Atom, [Lexeme])
-parseAtom (A:ls) = (Just Unit, ls)
-parseAtom ls     = (Nothing, ls)
+instance Alternative Parser where
+   -- empty :: Parser a
+   empty = P (\_ -> Nothing)
 
-parse' :: [Lexeme] -> Maybe Sentence
-parse' ls | (s@(Just _), []) <- (sen, rest) = s
-         | otherwise                       = Nothing
-    where (sen, rest) = parseSentence ls
+   -- (<|>) :: Parser a -> Parser a -> Parser a
+   p <|> q = P (\inp -> case parse p inp of
+                           Nothing    -> parse q inp
+                           j@(Just _) -> j)
 
-parse :: String -> Maybe Sentence
-parse = parse' . tokenise
+parse :: Parser a -> [Lexeme] -> Maybe (a, [Lexeme])
+parse (P p) inp = p inp
+
+item :: Parser Lexeme
+item = P (\inp -> case inp of
+                     [] -> Nothing
+                     (l:ls)  -> Just (l, ls))
+
+sat :: (Lexeme -> Bool) -> Parser Lexeme
+sat p = do x <- item
+           if p x then return x else empty
+
+sentence :: Parser Sentence
+sentence = do x <- expr
+              return $ SenE x
+           <|>
+           do t <- term
+              return $ SenT t
+           <|>
+           do a <- atom
+              return $ SenA a
+
+expr :: Parser Expr
+expr = do t <- term
+          x <- expr'
+          return $ Expr t x
+
+expr' :: Parser Expr'
+expr' = do _ <- sat isPlus
+           t <- term
+           x <- expr'
+           return $ Expr'Plus t x
+        <|>
+        return Expr'Epsilon
+
+term :: Parser Term
+term = do a <- atom
+          t <- term'
+          return $ Term a t
+
+term' :: Parser Term'
+term' = do _ <- sat isMul
+           a <- atom
+           t <- term'
+           return $ Term'Mul a t
+        <|>
+        return Term'Epsilon
+
+atom :: Parser Atom
+atom = do _ <- sat isLParen
+          x <- expr
+          _ <- sat isRParen
+          return $ Atom x
+       <|>
+       do _ <- sat isA
+          return Unit
+
+doParse' :: [Lexeme] -> Maybe Sentence
+doParse' ls = case parse sentence ls of
+              Just (a, []) -> Just a
+              _ -> Nothing
+
+doParse :: String -> Maybe Sentence
+doParse = doParse' . tokenise
