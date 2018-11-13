@@ -1,7 +1,6 @@
-module RecDesc (module RecDesc, module Control.Applicative) where
+module RecDesc where
 
-import Control.Applicative
-
+import MonadicParser
 import Tokeniser
 
 -- The top-level production.
@@ -34,51 +33,6 @@ data Atom =
       Atom Expr
     | Unit
         deriving (Show, Eq, Ord)
-
-newtype Parser a = P ([Lexeme] -> Maybe (a, [Lexeme]))
-
-instance Functor Parser where
-   -- fmap :: (a -> b) -> Parser a -> Parser b
-   fmap g p = P (\inp -> case parse p inp of
-                           Nothing       -> Nothing
-                           Just (v, out) -> Just (g v, out))
-
-instance Applicative Parser where
-   -- pure :: a -> Parser a
-   pure v = P (\inp -> Just (v,inp))
-
-   -- <*> :: Parser (a -> b) -> Parser a -> Parser b
-   pg <*> px = P (\inp -> case parse pg inp of
-                             Nothing       -> Nothing
-                             Just (g, out) -> parse (fmap g px) out)
-
-instance Monad Parser where
-   -- (>>=) :: Parser a -> (a -> Parser b) -> Parser b
-   p >>= f = P (\inp -> case parse p inp of
-                           Nothing       -> Nothing
-                           Just (v, out) -> parse (f v) out)
-
-
-instance Alternative Parser where
-   -- empty :: Parser a
-   empty = P (\_ -> Nothing)
-
-   -- (<|>) :: Parser a -> Parser a -> Parser a
-   p <|> q = P (\inp -> case parse p inp of
-                           Nothing    -> parse q inp
-                           j@(Just _) -> j)
-
-parse :: Parser a -> [Lexeme] -> Maybe (a, [Lexeme])
-parse (P p) inp = p inp
-
-item :: Parser Lexeme
-item = P (\inp -> case inp of
-                     [] -> Nothing
-                     (l:ls)  -> Just (l, ls))
-
-sat :: (Lexeme -> Bool) -> Parser Lexeme
-sat p = do x <- item
-           if p x then return x else empty
 
 sentence :: Parser Sentence
 sentence = do x <- expr
