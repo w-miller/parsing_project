@@ -1,11 +1,4 @@
-module Grammar where
-
--- The top-level production.
-data Sentence =
-      SenE Expr
-    | SenT Term
-    | SenA Atom
-        deriving (Show, Eq, Ord)
+module Part1Grammar where
 
 -- Use the non-left-recursive version of the grammar for recursive descent.
 data Expr =

@@ -1,20 +1,10 @@
 module RecDesc where
 
-import Grammar
+import Part1Grammar
 import IntTokeniser
 import MonadicParser
 
 -- Parsers for each part of the grammar.
-sentence :: Parser Sentence
-sentence = do x <- expr
-              return $ SenE x
-           <|>
-           do t <- term
-              return $ SenT t
-           <|>
-           do a <- atom
-              return $ SenA a
-
 expr :: Parser Expr
 expr = do t <- term
           x <- expr'
@@ -51,5 +41,5 @@ atom = do _ <- sat isLParen
           return $ AtomInt i
 
 -- The main entry point.
-doParse :: String -> Maybe Sentence
-doParse = parseEntryPoint sentence . tokenise
+recDescParse :: String -> Maybe Expr
+recDescParse = parseEntryPoint expr . tokenise

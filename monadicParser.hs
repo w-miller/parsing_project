@@ -16,7 +16,7 @@ instance Functor Parser where
 
 instance Applicative Parser where
    -- pure :: a -> Parser a
-   pure v = P (\inp -> Just (v,inp))
+   pure v = P (\inp -> Just (v, inp))
 
    -- <*> :: Parser (a -> b) -> Parser a -> Parser b
    pg <*> px = P (\inp -> case parse pg inp of
@@ -48,6 +48,18 @@ item :: Parser Lexeme
 item = P (\inp -> case inp of
                      [] -> Nothing
                      (l:ls)  -> Just (l, ls))
+
+-- Return the next lexeme in the list without removing it.
+peek :: Parser Lexeme
+peek = P (\inp -> case parse item inp of
+                          Nothing -> Nothing
+                          Just (l, ls) -> Just (l, (l:ls)))
+
+-- Define 'lexical equality' between lexemes by ignoring arguments to
+-- constructors. Any two Lexemes with the same constructor are lexically equal.
+lexEq :: Lexeme -> Lexeme -> Bool
+lexEq (AInt _) (AInt _) = True
+lexEq x y = x == y
 
 -- Parser to test whether or not a lexeme satisfies a predicate.
 sat :: (Lexeme -> Bool) -> Parser Lexeme
