@@ -1,7 +1,7 @@
 module RecDesc where
 
 import MonadicParser
-import Tokeniser
+import IntTokeniser
 
 -- The top-level production.
 data Sentence =
@@ -31,7 +31,7 @@ data Term' =
 
 data Atom =
       Atom Expr
-    | Unit
+    | AtomInt Int
         deriving (Show, Eq, Ord)
 
 sentence :: Parser Sentence
@@ -76,8 +76,8 @@ atom = do _ <- sat isLParen
           _ <- sat isRParen
           return $ Atom x
        <|>
-       do _ <- sat isA
-          return Unit
+       do (AInt i) <- sat isAInt
+          return $ AtomInt i
 
 doParse' :: [Lexeme] -> Maybe Sentence
 doParse' ls = case parse sentence ls of

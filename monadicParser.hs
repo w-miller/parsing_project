@@ -1,6 +1,6 @@
 module MonadicParser (module MonadicParser, module Control.Applicative) where
 
-import Tokeniser
+import IntTokeniser
 
 import Control.Applicative
 

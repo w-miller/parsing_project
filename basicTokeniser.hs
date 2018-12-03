@@ -1,4 +1,4 @@
-module Tokeniser where
+module BasicTokeniser where
 
 -- The potential lexemes we'll find in the source input.
 data Lexeme =
