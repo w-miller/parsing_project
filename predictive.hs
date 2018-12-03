@@ -4,9 +4,6 @@ import Part1Grammar
 import IntTokeniser
 import MonadicParser
 
-import Debug.Trace
-debug = flip trace
-
 -- Parsers for each part of the grammar.
 expr :: Parser Expr
 expr = peek >>= \x -> exprAux x
