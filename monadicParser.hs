@@ -53,3 +53,9 @@ item = P (\inp -> case inp of
 sat :: (Lexeme -> Bool) -> Parser Lexeme
 sat p = do x <- item
            if p x then return x else empty
+
+parseEntryPoint :: (Parser a) -> [Lexeme] -> Maybe a
+-- e is the entry-point production.
+parseEntryPoint e ls = case parse e ls of
+                           Just (a, []) -> Just a
+                           _ -> Nothing

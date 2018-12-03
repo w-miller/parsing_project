@@ -1,39 +1,10 @@
 module RecDesc where
 
-import MonadicParser
+import Grammar
 import IntTokeniser
+import MonadicParser
 
--- The top-level production.
-data Sentence =
-      SenE Expr
-    | SenT Term
-    | SenA Atom
-        deriving (Show, Eq, Ord)
-
--- Use the non-left-recursive version of the grammar for recursive descent.
-data Expr =
-      Expr Term Expr'
-        deriving (Show, Eq, Ord)
-
-data Expr' =
-      Expr'Plus Term Expr'
-    | Expr'Epsilon
-        deriving (Show, Eq, Ord)
-
-data Term =
-      Term Atom Term'
-        deriving (Show, Eq, Ord)
-
-data Term' =
-      Term'Mul Atom Term'
-    | Term'Epsilon
-        deriving (Show, Eq, Ord)
-
-data Atom =
-      Atom Expr
-    | AtomInt Int
-        deriving (Show, Eq, Ord)
-
+-- Parsers for each part of the grammar.
 sentence :: Parser Sentence
 sentence = do x <- expr
               return $ SenE x
@@ -79,10 +50,6 @@ atom = do _ <- sat isLParen
        do (AInt i) <- sat isAInt
           return $ AtomInt i
 
-doParse' :: [Lexeme] -> Maybe Sentence
-doParse' ls = case parse sentence ls of
-              Just (a, []) -> Just a
-              _ -> Nothing
-
+-- The main entry point.
 doParse :: String -> Maybe Sentence
-doParse = doParse' . tokenise
+doParse = parseEntryPoint sentence . tokenise
