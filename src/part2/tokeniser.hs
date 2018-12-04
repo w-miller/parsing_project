@@ -27,9 +27,10 @@ takeToken ('/':s)  = (Just LexDiv, s)
 takeToken ('(':s)  = (Just LexLParen, s)
 takeToken (')':s)  = (Just LexRParen, s)
 takeToken cs@(c:_) | isDigit c = (Just $ LexInt $ read t, s)
+    where (t, s) = span (isDigit) cs
 -- IDs must start with alphabetical character.
-                   | isAlpha c = (Just $ LexId t, s)
-    where (t, s) = span (not . isSpace) cs
+takeToken cs@(c:_) | isAlpha c = (Just $ LexId t, s)
+    where (t, s) = span (isAlphaNum) cs
 takeToken e = error $ e ++ " does not start with a valid token."
 
 -- Tokenises a string by mapping substrings to lexemes.
