@@ -1,4 +1,4 @@
-module PrettyPrint where
+module PrettyPrint (prettyFormatMaybeExpr, prettyFormatExpr) where
 
 import Part1Grammar
 
