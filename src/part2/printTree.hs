@@ -22,4 +22,4 @@ fToTree (Int i)    = Node ("F: " ++ show i) []
 fToTree (Id s)     = Node ("F: " ++ s) []
 
 main :: IO ()
-main = getContents >>= putStrLn . drawTree . eToTree . bottomUp. tokenise
+main = getContents >>= putStrLn . drawTree . eToTree . bottomUp . tokenise
