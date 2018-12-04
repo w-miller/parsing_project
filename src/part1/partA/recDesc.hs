@@ -40,6 +40,8 @@ atom = do _ <- sat isLParen
        do (AInt i) <- sat isAInt
           return $ AtomInt i
 
--- The main entry point.
 recDescParse :: String -> Maybe Expr
 recDescParse = parseEntryPoint expr . tokenise
+
+main :: IO ()
+main = getContents >>= putStrLn . show . recDescParse

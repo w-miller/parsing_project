@@ -69,3 +69,10 @@ atomAux l | l `lexEq` LParen =
 
 predictiveParse :: String -> Maybe Expr
 predictiveParse = parseEntryPoint expr . tokenise
+
+main :: IO ()
+main = do
+    inp <- getContents
+    case predictiveParse inp of
+        Just e  -> putStrLn $ show e
+        Nothing -> error "Couldn't parse"
