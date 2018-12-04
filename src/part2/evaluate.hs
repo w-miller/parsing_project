@@ -19,7 +19,7 @@ evaluateE s (T t)       = evaluateT s t
 
 evaluateT :: SymTable -> T -> Int
 evaluateT s (Mul t f) = evaluateT s t * evaluateF s f
-evaluateT s (Div t f) = evaluateT s t * evaluateF s f
+evaluateT s (Div t f) = evaluateT s t `div` evaluateF s f
 evaluateT s (F f)     = evaluateF s f
 
 evaluateF :: SymTable -> F -> Int

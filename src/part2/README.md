@@ -88,6 +88,7 @@ You can evaluate an expression with a method similar to the following:
 [Will@Wills-MacBook-Air ~/parsing/src/part2 15:28:40]
 $ echo '(a+1)*3-b' | runhaskell -Wall evaluate.hs a=5 b=4
 14
+
 [Will@Wills-MacBook-Air ~/parsing/src/part2 15:28:46]
 $ echo '(a+1)*3-b/c' | runhaskell -Wall evaluate.hs a=5 b=4
 evaluate.hs: The symbol 'c' was not defined.
