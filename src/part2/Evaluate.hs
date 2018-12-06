@@ -30,17 +30,17 @@ evaluateF s (Id k)     =
         Nothing -> error $ "The symbol '" ++ k ++ "' was not defined."
 
 -- Convert a string like "k=10" to ("k", 10)
-splitKV :: String -> (String, Int)
-splitKV (c:c':cs) | c' == '=' = ([c], read cs)
+parseKV :: String -> (String, Int)
+parseKV (c:c':cs) | c' == '=' = ([c], read cs)
                   | otherwise = ((c:k), v)
-    where (k, v) = splitKV $ c':cs
-splitKV e = error $ "Cannot split " ++ e
+    where (k, v) = parseKV $ c':cs
+parseKV e = error $ "Cannot split " ++ e
 
 main :: IO ()
 main = do
     args <- getArgs
     -- Construct a symbol table mapping variable names to integers.
-    let symTable = fromList $ map splitKV args
+    let symTable = fromList $ map parseKV args
     -- Take expression string from input (usually stdin), and variable bindings
     -- from arguments, in the format x=1.
     getContents >>= print . evaluateE symTable . bottomUp . tokenise
