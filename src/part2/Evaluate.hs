@@ -1,7 +1,6 @@
 module Evaluate where
 
 import Data.Map hiding (map)
-import Data.List.Split
 import Prelude hiding (lookup)
 import System.Environment
 
@@ -30,16 +29,18 @@ evaluateF s (Id k)     =
         Just v  -> v
         Nothing -> error $ "The symbol '" ++ k ++ "' was not defined."
 
--- Convert a list like ["a", "1"] to a tuple like ("a", 1).
-toStringIntPair :: [String] -> (String, Int)
-toStringIntPair [x, y] = (x, read y)
-toStringIntPair _      = error "Can't convert list without two elements."
+-- Convert a string like "k=10" to ("k", 10)
+splitKV :: String -> (String, Int)
+splitKV (c:c':cs) | c' == '=' = ([c], read cs)
+                  | otherwise = ((c:k), v)
+    where (k, v) = splitKV $ c':cs
+splitKV e = error $ "Cannot split " ++ e
 
 main :: IO ()
 main = do
     args <- getArgs
     -- Construct a symbol table mapping variable names to integers.
-    let symTable = fromList $ map (toStringIntPair . splitOn "=") args
+    let symTable = fromList $ map splitKV args
     -- Take expression string from input (usually stdin), and variable bindings
     -- from arguments, in the format x=1.
     getContents >>= print . evaluateE symTable . bottomUp . tokenise
