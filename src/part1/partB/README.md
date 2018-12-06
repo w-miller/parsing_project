@@ -10,7 +10,7 @@ following:
 
 ```
 [Will@Wills-MacBook-Air ~/parsing/src/part1/partB 16:31:36]
-$ echo '1+2*3' | runhaskell -i.. -i../.. predictive.hs
+$ echo '1+2*3' | runhaskell -i.. -i../.. Predictive.hs
 Expr (Term (AtomInt 1) Term'Epsilon) (Expr'Plus (Term (AtomInt 2) (Term'Mul (AtomInt 3) Term'Epsilon)) Expr'Epsilon)
 ```
 
@@ -21,7 +21,7 @@ following:
 
 ```
 [Will@Wills-MacBook-Air ~/parsing/src/part1/partB 16:34:57]
-$ echo '1+2*3' | runhaskell -i.. -i../.. partBPrettyPrint.hs
+$ echo '1+2*3' | runhaskell -i.. -i../.. PartBPrettyPrint.hs
 1 + 2 * 3
 ```
 
@@ -32,6 +32,6 @@ following:
 
 ```
 [Will@Wills-MacBook-Air ~/parsing/src/part1/partB 16:31:49]
-$ echo '1+2*3' | runhaskell -i.. -i../.. partBEvaluate.hs
+$ echo '1+2*3' | runhaskell -i.. -i../.. PartBEvaluate.hs
 7
 ```

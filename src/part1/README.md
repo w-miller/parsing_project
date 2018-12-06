@@ -6,15 +6,15 @@ run the specific parts.
 
 ## Contents
 
-* `evaluate.hs`: Evaluates a Part 1 `Expr` to an integer.
+* `Evaluate.hs`: Evaluates a Part 1 `Expr` to an integer.
 
-* `intTokeniser.hs`: Tokenises a string into lexemes, according to the valid
+* `IntTokeniser.hs`: Tokenises a string into lexemes, according to the valid
   tokens in the Part 1 grammar. Allows arbitrary integers, instead of just the
   character 'a'.
 
-* `part1Grammar.hs`: Defines the grammar used for Part 1.
+* `Part1Grammar.hs`: Defines the grammar used for Part 1.
 
-* `prettyPrint.hs`: Contains functions to allow pretty linear printing of a
+* `PrettyPrint.hs`: Contains functions to allow pretty linear printing of a
   Part 1 Expr. N.B. this prints and canonically formats the expression from a
   parse tree; it does not pretty-print the parse tree itself, as that task was
   completed in Part 2.

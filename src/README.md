@@ -2,5 +2,5 @@
 
 ## Contents
 
-* `monadicParser.hs`: Contains the base Haskell parser framework, which is used
+* `MonadicParser.hs`: Contains the base Haskell parser framework, which is used
   throughout the project.
